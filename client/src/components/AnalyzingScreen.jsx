@@ -109,9 +109,9 @@ export default function AnalyzingScreen({ exam, preview, mode = 'pyq' }) {
         </div>
 
         {/* Timer */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-3 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-          <span className="text-gray-800 font-bold text-sm tabular-nums">{elapsed}s</span>
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+          <span className="text-gray-700 font-bold text-sm tabular-nums">{elapsed}s</span>
           <span className="text-gray-400 text-sm">usually takes 10-20s</span>
         </div>
       </div>
