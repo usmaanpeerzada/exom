@@ -15,6 +15,9 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
 
   const [practiceMode, setPracticeMode] = useState(false)
   const [score, setScore] = useState({ correct: 0, total: 0 })
+  const [allPyqs, setAllPyqs] = useState(pyqs)
+  const [batch, setBatch] = useState(1)
+  const [loadingMore, setLoadingMore] = useState(false)
   const { saveResult } = usePracticeHistory()
 
   function handleAnswer(correct) {
@@ -25,6 +28,25 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
   function toggleMode() {
     setPracticeMode((m) => !m)
     setScore({ correct: 0, total: 0 })
+  }
+
+  async function loadMore() {
+    setLoadingMore(true)
+    try {
+      const res = await fetch('/api/practice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, subject, exam, batch: batch + 1 }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setAllPyqs((prev) => [...prev, ...(data.pyqs || [])])
+      setBatch((b) => b + 1)
+    } catch {
+      // silently fail — button stays visible to retry
+    } finally {
+      setLoadingMore(false)
+    }
   }
 
   const scorePercent = score.total > 0 ? Math.round((score.correct / score.total) * 100) : null
@@ -71,7 +93,7 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className={`w-2 h-2 rounded-full ${colors.bar}`} />
-            <span className="text-xs font-semibold text-gray-500">{pyqs.length} PYQs</span>
+            <span className="text-xs font-semibold text-gray-500">{allPyqs.length} PYQs</span>
           </div>
           {practiceMode && score.total > 0 && (
             <>
@@ -88,7 +110,6 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
           )}
         </div>
 
-        {/* Mode toggle */}
         <button
           onClick={toggleMode}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
@@ -114,7 +135,6 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
         </button>
       </div>
 
-      {/* Mode hint */}
       {practiceMode && (
         <div className="mx-4 mt-3 px-4 py-2.5 bg-indigo-50 rounded-2xl flex items-center gap-2">
           <span className="text-indigo-400 text-sm">✏️</span>
@@ -124,7 +144,7 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
 
       {/* PYQ list */}
       <div className="flex-1 px-4 py-4 flex flex-col gap-3">
-        {pyqs.length === 0 ? (
+        {allPyqs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
               <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,16 +155,42 @@ export default function ResultsView({ results, exam, preview, onReset, onGetExpl
             <p className="text-gray-400 text-sm mt-1">Try a clearer photo or different page</p>
           </div>
         ) : (
-          pyqs.map((pyq, i) => (
-            <PYQCard
-              key={i}
-              pyq={pyq}
-              index={i}
-              exam={exam}
-              practiceMode={practiceMode}
-              onAnswer={handleAnswer}
-            />
-          ))
+          <>
+            {allPyqs.map((pyq, i) => (
+              <PYQCard
+                key={i}
+                pyq={pyq}
+                index={i}
+                exam={exam}
+                practiceMode={practiceMode}
+                onAnswer={handleAnswer}
+              />
+            ))}
+
+            {/* Load More */}
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="w-full py-3.5 border-2 border-dashed border-gray-200 rounded-2xl text-sm font-bold text-gray-500 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {loadingMore ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Loading more questions...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Load 15 More PYQs
+                </>
+              )}
+            </button>
+          </>
         )}
       </div>
 

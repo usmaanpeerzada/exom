@@ -2,7 +2,7 @@ const EXAMS_META = {
   JEE:  { label: 'JEE',  sub: 'Maths · Phy · Chem',  active: 'bg-blue-600 shadow-blue-200',   idle: 'bg-white border border-blue-100 text-blue-600' },
   NEET: { label: 'NEET', sub: 'Bio · Phy · Chem',     active: 'bg-emerald-600 shadow-emerald-200', idle: 'bg-white border border-emerald-100 text-emerald-600' },
   CUET: { label: 'CUET', sub: 'All subjects',          active: 'bg-orange-500 shadow-orange-200',   idle: 'bg-white border border-orange-100 text-orange-500' },
-  CBSE: { label: 'CBSE', sub: 'Class 11–12',           active: 'bg-violet-600 shadow-violet-200',   idle: 'bg-white border border-violet-100 text-violet-600' },
+  CBSE: { label: 'CBSE', sub: 'Class 11 & 12',          active: 'bg-violet-600 shadow-violet-200',   idle: 'bg-white border border-violet-100 text-violet-600' },
 }
 
 export default function ExamPicker({ exams, selected, onSelect }) {

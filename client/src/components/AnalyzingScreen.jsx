@@ -91,7 +91,7 @@ export default function AnalyzingScreen({ exam, preview, mode = 'pyq' }) {
           <div className="flex items-center gap-2 bg-white/8 rounded-full px-4 py-2">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             <span className="text-white text-sm font-bold tabular-nums">{elapsed}s</span>
-            <span className="text-gray-500 text-sm">· usually 10–20s</span>
+            <span className="text-gray-500 text-sm">· usually 10-20s</span>
           </div>
           <p className="text-gray-600 text-xs">AI is working on it, hang tight</p>
         </div>

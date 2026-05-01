@@ -21,8 +21,12 @@ function safeParseJSON(raw) {
 }
 
 router.post('/practice', async (req, res) => {
-  const { topic, subject, exam } = req.body
+  const { topic, subject, exam, batch = 1 } = req.body
   if (!topic || !exam) return res.status(400).json({ error: 'Topic and exam are required.' })
+
+  const batchNote = batch > 1
+    ? `This is batch ${batch}. You MUST generate completely different questions from previous batches. Use different years, different angles on the topic, different difficulty levels.`
+    : ''
 
   try {
     const response = await groq.chat.completions.create({
@@ -34,9 +38,10 @@ router.post('/practice', async (req, res) => {
 
 Topic: ${topic}
 Subject: ${subject || 'Unknown'}
-Exam: ${exam} — ${EXAM_CONTEXT[exam]}
+Exam: ${exam} (${EXAM_CONTEXT[exam]})
+${batchNote}
 
-Return 10 real PYQs from ${exam} specifically on "${topic}". Write all math in plain text only — no LaTeX.
+Return 15 real PYQs from ${exam} specifically on "${topic}". Write all math in plain text only, no LaTeX, no backslashes. Use "a/b" for fractions, "x^2" for powers.
 
 Return ONLY raw JSON:
 {
