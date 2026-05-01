@@ -14,9 +14,16 @@ const ANSWER_COLORS = {
   CBSE: 'bg-violet-600',
 }
 
+let _audioCtx = null
+function getCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  if (_audioCtx.state === 'suspended') _audioCtx.resume()
+  return _audioCtx
+}
+
 function playSound(correct) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const ctx = getCtx()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.connect(gain)
