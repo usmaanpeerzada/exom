@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import FeedbackModal from './components/FeedbackModal'
 import IntroScreen from './screens/IntroScreen'
 import ExamScreen from './screens/ExamScreen'
 import CaptureScreen from './screens/CaptureScreen'
@@ -49,6 +50,8 @@ export default function App() {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || 'Analysis failed.')
         if (currentMode === 'pyq') saveToHistory(exam, data)
+        const count = parseInt(localStorage.getItem('exom_scan_count') || '0', 10)
+        localStorage.setItem('exom_scan_count', count + 1)
         setResults(data)
         setStatus('results')
       } catch (err) {
@@ -127,9 +130,9 @@ export default function App() {
   // Results
   if (status === 'results') {
     if (mode === 'doubt') {
-      return <DoubtView result={results} exam={exam} preview={preview} onReset={resetToCapture} onGetPYQs={fetchPYQsForTopic} />
+      return <><DoubtView result={results} exam={exam} preview={preview} onReset={resetToCapture} onGetPYQs={fetchPYQsForTopic} /><FeedbackModal /></>
     }
-    return <ResultsView results={results} exam={exam} preview={preview} onReset={resetToCapture} onGetExplanation={fetchExplanation} />
+    return <><ResultsView results={results} exam={exam} preview={preview} onReset={resetToCapture} onGetExplanation={fetchExplanation} /><FeedbackModal /></>
   }
 
   // Error
