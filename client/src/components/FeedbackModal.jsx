@@ -10,7 +10,7 @@ export default function FeedbackModal() {
     if (localStorage.getItem('exom_feedback_done')) return
 
     const count = parseInt(localStorage.getItem('exom_scan_count') || '0', 10)
-    if (count < 2) return
+    if (count < 1) return
 
     const t = setTimeout(() => {
       setVisible(true)
