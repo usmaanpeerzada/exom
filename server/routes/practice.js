@@ -50,13 +50,16 @@ Return ONLY raw JSON:
   "pyqs": [
     {
       "year": "2022",
+      "paper": "Paper 1, Shift 2",
       "question": "question text",
       "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
       "answer": "(A)",
       "explanation": "brief explanation"
     }
   ]
-}`,
+}
+
+For "paper": include paper number, shift, and set where known (e.g. "Paper 1, Shift 2", "Phase 2", "Shift 1"). Leave empty string if unknown.`,
         }],
       })
     )

@@ -59,6 +59,7 @@ JSON format:
   "pyqs": [
     {
       "year": "2023",
+      "paper": "Paper 1, Shift 2",
       "question": "full question in plain text",
       "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
       "answer": "(A)",
@@ -67,6 +68,7 @@ JSON format:
   ]
 }
 
+For "paper": include paper number, shift, and set where known (e.g. "Paper 1, Shift 2", "Phase 2, Set B", "Shift 1"). Leave empty string if unknown.
 Omit "options" for non-MCQ questions. If the image is unreadable, return topic "Unrecognized" with empty pyqs array.`,
             },
           ],

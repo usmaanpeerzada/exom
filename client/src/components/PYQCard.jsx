@@ -64,7 +64,7 @@ function shareOnWhatsApp(question, answer, explanation) {
 export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState(null)
-  const { year, question, options, answer, explanation } = pyq
+  const { year, paper, question, options, answer, explanation } = pyq
 
   const hasOptions = options && options.length > 0
   const isAnswered = selected !== null
@@ -97,6 +97,11 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
           {year && (
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${YEAR_COLORS[exam]}`}>
               {year}
+            </span>
+          )}
+          {paper && (
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+              {paper}
             </span>
           )}
         </div>
