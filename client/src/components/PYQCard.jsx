@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 const YEAR_COLORS = {
   JEE:  'bg-blue-50 text-blue-600',
@@ -66,6 +66,10 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
   const [selected, setSelected] = useState(null)
   const { year, paper, question, options, answer, explanation } = pyq
 
+  const shuffledOptions = useMemo(() =>
+    options ? [...options].sort(() => Math.random() - 0.5) : []
+  , [])
+
   const hasOptions = options && options.length > 0
   const isAnswered = selected !== null
 
@@ -125,7 +129,7 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
       {/* Options */}
       {hasOptions && (
         <div className="px-4 pb-3 flex flex-col gap-1.5">
-          {options.map((opt, i) => (
+          {shuffledOptions.map((opt, i) => (
             <button
               key={i}
               onClick={() => handleOptionClick(opt)}
