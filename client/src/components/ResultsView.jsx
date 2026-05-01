@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PYQCard from './PYQCard'
+import { usePracticeHistory } from '../hooks/usePracticeHistory'
 
 const EXAM_COLORS = {
   JEE:  { badge: 'bg-blue-600',    bar: 'bg-blue-600',    light: 'bg-blue-50 text-blue-600' },
@@ -14,9 +15,11 @@ export default function ResultsView({ results, exam, preview, onReset }) {
 
   const [practiceMode, setPracticeMode] = useState(false)
   const [score, setScore] = useState({ correct: 0, total: 0 })
+  const { saveResult } = usePracticeHistory()
 
   function handleAnswer(correct) {
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }))
+    saveResult(topic, subject, exam, correct)
   }
 
   function toggleMode() {

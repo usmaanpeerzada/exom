@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync } from 'fs'
 import analyzeRouter from './routes/analyze.js'
+import doubtRouter from './routes/doubt.js'
+import practiceRouter from './routes/practice.js'
 
 dotenv.config()
 
@@ -25,7 +27,10 @@ const limiter = rateLimit({
 })
 
 app.use('/api/analyze', limiter)
+app.use('/api/doubt', limiter)
 app.use('/api', analyzeRouter)
+app.use('/api', doubtRouter)
+app.use('/api', practiceRouter)
 
 app.get('/health', (_, res) => res.json({ status: 'ok' }))
 

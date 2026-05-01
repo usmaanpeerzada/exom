@@ -58,8 +58,8 @@ router.post('/analyze', async (req, res) => {
 Target exam: ${exam} — ${EXAM_CONTEXT[exam]}
 
 Tasks:
-1. Read the image content and identify the main topic, subject, and chapter.
-2. Return 15 real previous year questions (PYQs) from ${exam} on this topic. Include questions from different years where possible.
+1. Read the image carefully. Identify the SPECIFIC concept being shown — not just the chapter name, but the exact subtopic (e.g. not just "Kinematics" but "Relative motion on a moving belt", not just "Electrochemistry" but "Nernst equation applications").
+2. Return 15 real previous year questions (PYQs) from ${exam} that test EXACTLY that specific concept. Every question must be directly relevant to what is visible in the image — not general chapter questions. Include questions from different years where possible.
 
 IMPORTANT formatting rules:
 - Write all math in plain text only. No LaTeX, no backslashes, no special symbols.
@@ -68,7 +68,7 @@ IMPORTANT formatting rules:
 
 JSON format:
 {
-  "topic": "topic name",
+  "topic": "specific concept name (e.g. Nernst Equation, Projectile at an angle, Mitosis - Metaphase)",
   "subject": "subject name",
   "chapter": "chapter name",
   "pyqs": [
