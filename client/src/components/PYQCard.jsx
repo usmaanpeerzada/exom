@@ -14,6 +14,32 @@ const ANSWER_COLORS = {
   CBSE: 'bg-violet-600',
 }
 
+function playSound(correct) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    if (correct) {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(523, ctx.currentTime)
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.12)
+      gain.gain.setValueAtTime(0.25, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.5)
+    } else {
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(220, ctx.currentTime)
+      gain.gain.setValueAtTime(0.2, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.3)
+    }
+  } catch {}
+}
+
 function getOptionLetter(opt) {
   return opt.match(/^\(([A-D])\)/)?.[1] || null
 }
@@ -41,6 +67,7 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
     const correct = isCorrectOption(opt, answer)
     setSelected(opt)
     onAnswer?.(correct)
+    playSound(correct)
   }
 
   function getOptionStyle(opt) {
@@ -50,7 +77,6 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
       if (selected === opt) return 'bg-red-50 border border-red-200 text-red-700'
       return 'bg-gray-50 border border-transparent text-gray-400'
     }
-    // Study mode
     if (open && isCorrectOption(opt, answer)) return 'bg-green-50 border border-green-200 text-green-800 font-semibold'
     return 'bg-gray-50 border border-transparent text-gray-600'
   }
@@ -67,7 +93,6 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
             </span>
           )}
         </div>
-        {/* WhatsApp share */}
         <button
           onClick={() => shareOnWhatsApp(question, answer, explanation || '')}
           className="w-7 h-7 flex items-center justify-center rounded-full bg-green-50 active:bg-green-100"
@@ -103,14 +128,14 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
         </div>
       )}
 
-      {/* For practice mode — show explanation after answering */}
+      {/* Practice mode: explanation after answering */}
       {practiceMode && isAnswered && explanation && (
         <div className="mx-4 mb-3 p-3 bg-gray-50 rounded-xl">
           <p className="text-xs text-gray-500 leading-relaxed">{explanation}</p>
         </div>
       )}
 
-      {/* Study mode toggle */}
+      {/* Study mode: reveal answer */}
       {!practiceMode && (
         <>
           <button
@@ -118,7 +143,7 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
             className="w-full px-4 py-3 border-t border-gray-50 flex items-center justify-between bg-gray-50/40 active:bg-gray-100 transition-colors"
           >
             <span className="text-xs font-semibold text-gray-400">
-              {open ? 'Hide answer' : 'Reveal answer & explanation'}
+              {open ? 'Hide answer' : 'Reveal answer'}
             </span>
             <svg className={`w-4 h-4 text-gray-300 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
               fill="none" stroke="currentColor" viewBox="0 0 24 24">
