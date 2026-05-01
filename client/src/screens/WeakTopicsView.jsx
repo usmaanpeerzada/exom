@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ResultsView from './ResultsView'
+import ResultsView from '../components/ResultsView'
 
 const EXAM_COLORS = {
   JEE:  { bar: 'bg-blue-500',    light: 'bg-blue-50 text-blue-600' },
