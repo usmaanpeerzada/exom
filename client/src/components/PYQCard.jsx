@@ -66,9 +66,15 @@ export default function PYQCard({ pyq, index, exam, practiceMode, onAnswer }) {
   const [selected, setSelected] = useState(null)
   const { year, paper, question, options, answer, explanation } = pyq
 
-  const shuffledOptions = useMemo(() =>
-    options ? [...options].sort(() => Math.random() - 0.5) : []
-  , [])
+  const shuffledOptions = useMemo(() => {
+    if (!options || options.length === 0) return []
+    const arr = [...options]
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    return arr
+  }, [])
 
   const hasOptions = options && options.length > 0
   const isAnswered = selected !== null
