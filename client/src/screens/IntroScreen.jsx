@@ -7,12 +7,6 @@ export default function IntroScreen({ onStart }) {
 
       {/* Top section */}
       <div className="flex-1 flex flex-col justify-center px-7 pt-20 pb-10 relative z-10">
-        {/* Badge */}
-        <div className="inline-flex self-start items-center gap-2 bg-white/15 rounded-full px-4 py-1.5 mb-8">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-white text-xs font-semibold tracking-wide">Free for students</span>
-        </div>
-
         {/* App name */}
         <h1 className="text-6xl font-black text-white tracking-tight leading-none mb-3">
           Exom<span className="text-yellow-300">.</span>
