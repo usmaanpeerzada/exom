@@ -1,9 +1,7 @@
-import 'dotenv/config'
 import { Router } from 'express'
-import Groq from 'groq-sdk'
+import { groqRequest } from '../keyManager.js'
 
 const router = Router()
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 const EXAM_CONTEXT = {
   JEE:  'JEE Main and JEE Advanced (Physics, Chemistry, Mathematics)',
@@ -13,53 +11,40 @@ const EXAM_CONTEXT = {
 }
 
 function safeParseJSON(raw) {
-  // Strip markdown code fences
   let text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
-
-  // Extract JSON object
   const match = text.match(/\{[\s\S]*\}/)
   if (!match) throw new Error('No JSON object found in response')
-
-  // Fix invalid JSON escape sequences (LaTeX: \frac, \alpha, \times etc.)
   const fixed = match[0].replace(/\\(?!["\\/bfnrtu])/g, '\\\\')
-
   return JSON.parse(fixed)
 }
 
 router.post('/analyze', async (req, res) => {
   const { image, mediaType, exam } = req.body
 
-  if (!image || !exam) {
-    return res.status(400).json({ error: 'Image and exam type are required.' })
-  }
-
-  if (!EXAM_CONTEXT[exam]) {
-    return res.status(400).json({ error: 'Invalid exam type.' })
-  }
+  if (!image || !exam) return res.status(400).json({ error: 'Image and exam type are required.' })
+  if (!EXAM_CONTEXT[exam]) return res.status(400).json({ error: 'Invalid exam type.' })
 
   try {
-    const response = await groq.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 4000,
-      messages: [
-        {
+    const response = await groqRequest((groq) =>
+      groq.chat.completions.create({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 4000,
+        messages: [{
           role: 'user',
           content: [
             {
               type: 'image_url',
-              image_url: {
-                url: `data:${mediaType || 'image/jpeg'};base64,${image}`,
-              },
+              image_url: { url: `data:${mediaType || 'image/jpeg'};base64,${image}` },
             },
             {
               type: 'text',
               text: `You are an expert on Indian competitive examinations. Analyze this image of student notes or a textbook page.
 
-Target exam: ${exam} — ${EXAM_CONTEXT[exam]}
+Target exam: ${exam} (${EXAM_CONTEXT[exam]})
 
 Tasks:
 1. Read the image carefully. Identify the SPECIFIC concept being shown — not just the chapter name, but the exact subtopic (e.g. not just "Kinematics" but "Relative motion on a moving belt", not just "Electrochemistry" but "Nernst equation applications").
-2. Return 15 real previous year questions (PYQs) from ${exam} that test EXACTLY that specific concept. Every question must be directly relevant to what is visible in the image — not general chapter questions. Include questions from different years where possible.
+2. Return 15 real previous year questions (PYQs) from ${exam} that test EXACTLY that specific concept. Every question must be directly relevant to what is visible in the image.
 
 IMPORTANT formatting rules:
 - Write all math in plain text only. No LaTeX, no backslashes, no special symbols.
@@ -68,7 +53,7 @@ IMPORTANT formatting rules:
 
 JSON format:
 {
-  "topic": "specific concept name (e.g. Nernst Equation, Projectile at an angle, Mitosis - Metaphase)",
+  "topic": "specific concept name",
   "subject": "subject name",
   "chapter": "chapter name",
   "pyqs": [
@@ -85,22 +70,22 @@ JSON format:
 Omit "options" for non-MCQ questions. If the image is unreadable, return topic "Unrecognized" with empty pyqs array.`,
             },
           ],
-        },
-      ],
-    })
+        }],
+      })
+    )
 
     const raw = response.choices[0].message.content.trim()
     console.log('[raw]', raw.slice(0, 200))
 
     const data = safeParseJSON(raw)
-
-    if (!data.topic || !Array.isArray(data.pyqs)) {
-      throw new Error('Unexpected response structure')
-    }
+    if (!data.topic || !Array.isArray(data.pyqs)) throw new Error('Unexpected response structure')
 
     res.json(data)
   } catch (err) {
     console.error('[analyze error]', err.message)
+    if (err.status === 429) {
+      return res.status(429).json({ error: 'All API keys are at their daily limit. Please try again tomorrow or contact support.' })
+    }
     res.status(500).json({ error: 'Could not analyze the image. Please try again with a clearer photo.' })
   }
 })

@@ -1,9 +1,7 @@
-import 'dotenv/config'
 import { Router } from 'express'
-import Groq from 'groq-sdk'
+import { groqRequest } from '../keyManager.js'
 
 const router = Router()
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 const EXAM_CONTEXT = {
   JEE:  'JEE Main and JEE Advanced (Physics, Chemistry, Mathematics)',
@@ -29,12 +27,13 @@ router.post('/practice', async (req, res) => {
     : ''
 
   try {
-    const response = await groq.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 3500,
-      messages: [{
-        role: 'user',
-        content: `You are an expert on Indian competitive exams. Generate focused practice questions.
+    const response = await groqRequest((groq) =>
+      groq.chat.completions.create({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 3500,
+        messages: [{
+          role: 'user',
+          content: `You are an expert on Indian competitive exams. Generate focused practice questions.
 
 Topic: ${topic}
 Subject: ${subject || 'Unknown'}
@@ -58,8 +57,9 @@ Return ONLY raw JSON:
     }
   ]
 }`,
-      }],
-    })
+        }],
+      })
+    )
 
     const raw = response.choices[0].message.content.trim()
     const data = safeParseJSON(raw)
@@ -67,6 +67,9 @@ Return ONLY raw JSON:
     res.json(data)
   } catch (err) {
     console.error('[practice error]', err.message)
+    if (err.status === 429) {
+      return res.status(429).json({ error: 'Daily limit reached. Please try again tomorrow.' })
+    }
     res.status(500).json({ error: 'Could not generate questions. Try again.' })
   }
 })

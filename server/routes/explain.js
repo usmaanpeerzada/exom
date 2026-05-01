@@ -1,9 +1,7 @@
-import 'dotenv/config'
 import { Router } from 'express'
-import Groq from 'groq-sdk'
+import { groqRequest } from '../keyManager.js'
 
 const router = Router()
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 const EXAM_CONTEXT = {
   JEE:  'JEE Main and JEE Advanced (Physics, Chemistry, Mathematics)',
@@ -25,12 +23,13 @@ router.post('/explain', async (req, res) => {
   if (!topic) return res.status(400).json({ error: 'Topic is required.' })
 
   try {
-    const response = await groq.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 2000,
-      messages: [{
-        role: 'user',
-        content: `You are an expert tutor for Indian competitive exams${exam ? ` (${EXAM_CONTEXT[exam]})` : ''}.
+    const response = await groqRequest((groq) =>
+      groq.chat.completions.create({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: `You are an expert tutor for Indian competitive exams${exam ? ` (${EXAM_CONTEXT[exam]})` : ''}.
 
 Explain this topic clearly for a student: "${topic}"${subject ? ` from ${subject}` : ''}
 
@@ -49,8 +48,9 @@ Return ONLY raw JSON, no markdown:
   "keyPoints": ["point 1", "point 2", "point 3"],
   "example": "a simple worked example in plain text"
 }`,
-      }],
-    })
+        }],
+      })
+    )
 
     const raw = response.choices[0].message.content.trim()
     const data = safeParseJSON(raw)
@@ -58,6 +58,9 @@ Return ONLY raw JSON, no markdown:
     res.json(data)
   } catch (err) {
     console.error('[explain error]', err.message)
+    if (err.status === 429) {
+      return res.status(429).json({ error: 'Daily limit reached. Please try again tomorrow.' })
+    }
     res.status(500).json({ error: 'Could not explain this topic. Please try again.' })
   }
 })

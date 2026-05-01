@@ -1,9 +1,7 @@
-import 'dotenv/config'
 import { Router } from 'express'
-import Groq from 'groq-sdk'
+import { groqRequest } from '../keyManager.js'
 
 const router = Router()
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 const EXAM_CONTEXT = {
   JEE:  'JEE Main and JEE Advanced (Physics, Chemistry, Mathematics)',
@@ -25,19 +23,20 @@ router.post('/doubt', async (req, res) => {
   if (!image) return res.status(400).json({ error: 'Image is required.' })
 
   try {
-    const response = await groq.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 2000,
-      messages: [{
-        role: 'user',
-        content: [
-          {
-            type: 'image_url',
-            image_url: { url: `data:${mediaType || 'image/jpeg'};base64,${image}` },
-          },
-          {
-            type: 'text',
-            text: `You are an expert tutor for Indian competitive exams${exam ? ` (${EXAM_CONTEXT[exam]})` : ''}.
+    const response = await groqRequest((groq) =>
+      groq.chat.completions.create({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: `data:${mediaType || 'image/jpeg'};base64,${image}` },
+            },
+            {
+              type: 'text',
+              text: `You are an expert tutor for Indian competitive exams${exam ? ` (${EXAM_CONTEXT[exam]})` : ''}.
 
 A student has photographed something they don't understand. Explain it clearly.
 
@@ -56,10 +55,11 @@ Return ONLY raw JSON, no markdown:
   "keyPoints": ["point 1", "point 2", "point 3"],
   "example": "a simple worked example in plain text"
 }`,
-          },
-        ],
-      }],
-    })
+            },
+          ],
+        }],
+      })
+    )
 
     const raw = response.choices[0].message.content.trim()
     const data = safeParseJSON(raw)
@@ -67,6 +67,9 @@ Return ONLY raw JSON, no markdown:
     res.json(data)
   } catch (err) {
     console.error('[doubt error]', err.message)
+    if (err.status === 429) {
+      return res.status(429).json({ error: 'Daily limit reached. Please try again tomorrow.' })
+    }
     res.status(500).json({ error: 'Could not explain this. Try a clearer photo.' })
   }
 })
