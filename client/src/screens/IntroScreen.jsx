@@ -19,7 +19,7 @@ export default function IntroScreen({ onStart }) {
         <div className="flex flex-col gap-4">
           {[
             { icon: '📸', title: 'Snap anything', desc: 'Notes, textbook pages, diagrams. Any photo works.' },
-            { icon: '🧠', title: 'AI reads your topic', desc: 'Identifies subject, chapter and concept automatically' },
+            { icon: '🎯', title: 'Built for Indian exams', desc: 'Trained on JEE, NEET, CUET and CBSE patterns. Finds the exact concept, not just the chapter.' },
             { icon: '📝', title: 'Real PYQs in seconds', desc: 'JEE, NEET, CUET and CBSE question banks' },
           ].map((f) => (
             <div key={f.title} className="flex items-start gap-4 bg-white/10 rounded-2xl px-4 py-4">
