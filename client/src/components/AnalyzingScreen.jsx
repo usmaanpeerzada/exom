@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const STEPS = {
   pyq: [
@@ -29,14 +29,17 @@ const EXAM_DOT = {
 
 export default function AnalyzingScreen({ exam, preview, mode = 'pyq' }) {
   const [step, setStep] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
   const steps = STEPS[mode] || STEPS.pyq
 
   useEffect(() => {
     setStep(0)
+    setElapsed(0)
     const timers = steps.slice(1).map((s, i) =>
       setTimeout(() => setStep(i + 1), s.delay)
     )
-    return () => timers.forEach(clearTimeout)
+    const ticker = setInterval(() => setElapsed((e) => e + 1), 1000)
+    return () => { timers.forEach(clearTimeout); clearInterval(ticker) }
   }, [mode])
 
   return (
@@ -84,7 +87,14 @@ export default function AnalyzingScreen({ exam, preview, mode = 'pyq' }) {
           ))}
         </div>
 
-        <p className="text-gray-500 text-xs text-center">This takes about 10–15 seconds</p>
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-2 bg-white/8 rounded-full px-4 py-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-white text-sm font-bold tabular-nums">{elapsed}s</span>
+            <span className="text-gray-500 text-sm">· usually 10–20s</span>
+          </div>
+          <p className="text-gray-600 text-xs">AI is working on it, hang tight</p>
+        </div>
       </div>
     </div>
   )
