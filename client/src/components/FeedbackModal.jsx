@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const FORM_URL = 'YOUR_GOOGLE_FORM_URL'
+const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdRyGCbsAKclg97s3APHzD2GCpXyxZvFn81wu7ozJv5x5P0Dw/viewform'
 
 export default function FeedbackModal() {
   const [visible, setVisible] = useState(false)
