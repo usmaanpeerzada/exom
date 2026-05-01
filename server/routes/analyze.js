@@ -1,0 +1,108 @@
+import 'dotenv/config'
+import { Router } from 'express'
+import Groq from 'groq-sdk'
+
+const router = Router()
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+
+const EXAM_CONTEXT = {
+  JEE:  'JEE Main and JEE Advanced (Physics, Chemistry, Mathematics)',
+  NEET: 'NEET UG (Physics, Chemistry, Biology - Botany & Zoology)',
+  CUET: 'CUET UG (domain subjects across streams)',
+  CBSE: 'CBSE Class 11 & 12 board exams',
+}
+
+function safeParseJSON(raw) {
+  // Strip markdown code fences
+  let text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+
+  // Extract JSON object
+  const match = text.match(/\{[\s\S]*\}/)
+  if (!match) throw new Error('No JSON object found in response')
+
+  // Fix invalid JSON escape sequences (LaTeX: \frac, \alpha, \times etc.)
+  const fixed = match[0].replace(/\\(?!["\\/bfnrtu])/g, '\\\\')
+
+  return JSON.parse(fixed)
+}
+
+router.post('/analyze', async (req, res) => {
+  const { image, mediaType, exam } = req.body
+
+  if (!image || !exam) {
+    return res.status(400).json({ error: 'Image and exam type are required.' })
+  }
+
+  if (!EXAM_CONTEXT[exam]) {
+    return res.status(400).json({ error: 'Invalid exam type.' })
+  }
+
+  try {
+    const response = await groq.chat.completions.create({
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      max_tokens: 8192,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mediaType || 'image/jpeg'};base64,${image}`,
+              },
+            },
+            {
+              type: 'text',
+              text: `You are an expert on Indian competitive examinations. Analyze this image of student notes or a textbook page.
+
+Target exam: ${exam} — ${EXAM_CONTEXT[exam]}
+
+Tasks:
+1. Read the image content and identify the main topic, subject, and chapter.
+2. Return 15 real previous year questions (PYQs) from ${exam} on this topic. Include questions from different years where possible.
+
+IMPORTANT formatting rules:
+- Write all math in plain text only. No LaTeX, no backslashes, no special symbols.
+- Write fractions as "a/b", powers as "x^2", Greek letters as their names (alpha, beta, theta).
+- Respond ONLY with a raw JSON object. No explanation. No markdown. No code fences.
+
+JSON format:
+{
+  "topic": "topic name",
+  "subject": "subject name",
+  "chapter": "chapter name",
+  "pyqs": [
+    {
+      "year": "2023",
+      "question": "full question in plain text",
+      "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
+      "answer": "(A)",
+      "explanation": "1-2 sentence explanation in plain text."
+    }
+  ]
+}
+
+Omit "options" for non-MCQ questions. If the image is unreadable, return topic "Unrecognized" with empty pyqs array.`,
+            },
+          ],
+        },
+      ],
+    })
+
+    const raw = response.choices[0].message.content.trim()
+    console.log('[raw]', raw.slice(0, 200))
+
+    const data = safeParseJSON(raw)
+
+    if (!data.topic || !Array.isArray(data.pyqs)) {
+      throw new Error('Unexpected response structure')
+    }
+
+    res.json(data)
+  } catch (err) {
+    console.error('[analyze error]', err.message)
+    res.status(500).json({ error: 'Could not analyze the image. Please try again with a clearer photo.' })
+  }
+})
+
+export default router
