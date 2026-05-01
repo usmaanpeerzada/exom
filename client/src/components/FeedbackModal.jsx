@@ -15,7 +15,7 @@ export default function FeedbackModal() {
     const t = setTimeout(() => {
       setVisible(true)
       requestAnimationFrame(() => setAnimateIn(true))
-    }, 2500)
+    }, 10000)
 
     return () => clearTimeout(t)
   }, [])
