@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
 
-const STEPS = [
-  { label: 'Reading your notes', delay: 0 },
-  { label: 'Identifying topic & subject', delay: 1200 },
-  { label: 'Finding PYQs', delay: 2800 },
-]
+const STEPS = {
+  pyq: [
+    { label: 'Reading your content', delay: 0 },
+    { label: 'Identifying topic & subject', delay: 1200 },
+    { label: 'Finding PYQs', delay: 2800 },
+  ],
+  doubt: [
+    { label: 'Analyzing your content', delay: 0 },
+    { label: 'Understanding the concept', delay: 1200 },
+    { label: 'Building explanation', delay: 2800 },
+  ],
+}
 
 const EXAM_RING = {
   JEE:  'border-blue-500',
@@ -20,15 +27,17 @@ const EXAM_DOT = {
   CBSE: 'bg-violet-500',
 }
 
-export default function AnalyzingScreen({ exam, preview }) {
+export default function AnalyzingScreen({ exam, preview, mode = 'pyq' }) {
   const [step, setStep] = useState(0)
+  const steps = STEPS[mode] || STEPS.pyq
 
   useEffect(() => {
-    const timers = STEPS.slice(1).map((s, i) =>
+    setStep(0)
+    const timers = steps.slice(1).map((s, i) =>
       setTimeout(() => setStep(i + 1), s.delay)
     )
     return () => timers.forEach(clearTimeout)
-  }, [])
+  }, [mode])
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col max-w-md mx-auto">
@@ -46,16 +55,20 @@ export default function AnalyzingScreen({ exam, preview }) {
           <div className={`absolute inset-0 rounded-full border-2 ${EXAM_RING[exam] || 'border-indigo-500'} opacity-20 animate-ping`} />
           <div className={`absolute inset-4 rounded-full border-2 ${EXAM_RING[exam] || 'border-indigo-500'} opacity-40 animate-ping [animation-delay:300ms]`} />
           <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
-            <svg className="w-7 h-7 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
+            {mode === 'doubt' ? (
+              <span className="text-2xl">🤔</span>
+            ) : (
+              <svg className="w-7 h-7 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            )}
           </div>
         </div>
 
         {/* Steps */}
         <div className="flex flex-col gap-4 w-full">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <div key={s.label} className={`flex items-center gap-4 transition-opacity duration-500 ${i <= step ? 'opacity-100' : 'opacity-25'}`}>
               <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 transition-all duration-300 ${
                 i < step ? (EXAM_DOT[exam] || 'bg-indigo-500') :

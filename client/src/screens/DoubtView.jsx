@@ -9,12 +9,19 @@ const EXAM_BADGE = {
   CBSE: 'bg-violet-100 text-violet-700',
 }
 
-export default function DoubtView({ result, exam, preview, onReset }) {
+const EXAM_BTN = {
+  JEE:  'bg-blue-600 shadow-blue-200',
+  NEET: 'bg-emerald-600 shadow-emerald-200',
+  CUET: 'bg-orange-500 shadow-orange-200',
+  CBSE: 'bg-violet-600 shadow-violet-200',
+}
+
+export default function DoubtView({ result, exam, preview, onReset, onGetPYQs }) {
   const { topic, subject, steps = [], keyPoints = [], example } = result
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col max-w-md mx-auto">
-      {/* Header */}
+      {/* Sticky header */}
       <div className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-100 px-4 py-3 flex items-center gap-3">
         <button onClick={onReset} className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 active:bg-gray-200 flex-shrink-0">
           <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +59,7 @@ export default function DoubtView({ result, exam, preview, onReset }) {
         {/* Steps */}
         {steps.map((step, i) => (
           <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className={`px-4 py-3 flex items-center gap-3 ${STEP_COLORS[i % STEP_COLORS.length]} bg-opacity-10`} style={{ backgroundColor: undefined }}>
+            <div className="px-4 py-3 flex items-center gap-3 bg-gray-50">
               <div className={`w-7 h-7 rounded-full ${STEP_COLORS[i % STEP_COLORS.length]} flex items-center justify-center flex-shrink-0`}>
                 <span className="text-white text-xs font-black">{i + 1}</span>
               </div>
@@ -90,11 +97,29 @@ export default function DoubtView({ result, exam, preview, onReset }) {
             <p className="text-gray-700 text-sm leading-relaxed">{example}</p>
           </div>
         )}
+
+        {/* Cross-navigation prompt */}
+        <div className="bg-blue-50 rounded-2xl border border-blue-100 px-4 py-3.5 flex items-center gap-3">
+          <span className="text-xl">📝</span>
+          <div>
+            <p className="text-blue-800 text-xs font-bold">Ready to test yourself?</p>
+            <p className="text-blue-600 text-xs mt-0.5">Practice real exam questions on this exact topic</p>
+          </div>
+        </div>
       </div>
 
-      {/* Back button */}
-      <div className="px-4 pb-10 pt-2 bg-white border-t border-gray-100">
-        <button onClick={onReset} className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm active:scale-[0.98] transition-all shadow-lg shadow-indigo-200">
+      {/* Bottom actions */}
+      <div className="px-4 pb-10 pt-3 bg-white border-t border-gray-100 flex flex-col gap-3">
+        <button
+          onClick={() => onGetPYQs(topic, subject, exam)}
+          className={`w-full py-4 text-white rounded-2xl font-bold text-sm active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2 ${EXAM_BTN[exam] || 'bg-indigo-600 shadow-indigo-200'}`}
+        >
+          <span>📝</span> Get PYQs for this Topic
+        </button>
+        <button
+          onClick={onReset}
+          className="w-full py-3.5 bg-gray-100 text-gray-600 rounded-2xl font-bold text-sm active:scale-[0.98] transition-all"
+        >
           Snap Another
         </button>
       </div>

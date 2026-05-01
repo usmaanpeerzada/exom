@@ -60,6 +60,48 @@ export default function App() {
     reader.readAsDataURL(file)
   }
 
+  async function fetchPYQsForTopic(topic, subject, examName) {
+    setPreview(null)
+    setMode('pyq')
+    setStatus('analyzing')
+    setError(null)
+    try {
+      const res = await fetch('/api/practice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, subject, exam: examName || exam }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch PYQs.')
+      setResults(data)
+      setStatus('results')
+    } catch (err) {
+      setError(err.message)
+      setStatus('error')
+    }
+  }
+
+  async function fetchExplanation(topic, subject, examName) {
+    setPreview(null)
+    setMode('doubt')
+    setStatus('analyzing')
+    setError(null)
+    try {
+      const res = await fetch('/api/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, subject, exam: examName || exam }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to get explanation.')
+      setResults(data)
+      setStatus('results')
+    } catch (err) {
+      setError(err.message)
+      setStatus('error')
+    }
+  }
+
   function openFromHistory(entry) {
     setResults({ topic: entry.topic, subject: entry.subject, chapter: entry.chapter, pyqs: entry.pyqs })
     setExam(entry.exam)
@@ -85,9 +127,9 @@ export default function App() {
   // Results
   if (status === 'results') {
     if (mode === 'doubt') {
-      return <DoubtView result={results} exam={exam} preview={preview} onReset={resetToCapture} />
+      return <DoubtView result={results} exam={exam} preview={preview} onReset={resetToCapture} onGetPYQs={fetchPYQsForTopic} />
     }
-    return <ResultsView results={results} exam={exam} preview={preview} onReset={resetToCapture} />
+    return <ResultsView results={results} exam={exam} preview={preview} onReset={resetToCapture} onGetExplanation={fetchExplanation} />
   }
 
   // Error

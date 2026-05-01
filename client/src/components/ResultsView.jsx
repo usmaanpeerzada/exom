@@ -9,7 +9,7 @@ const EXAM_COLORS = {
   CBSE: { badge: 'bg-violet-600',  bar: 'bg-violet-600',  light: 'bg-violet-50 text-violet-600' },
 }
 
-export default function ResultsView({ results, exam, preview, onReset }) {
+export default function ResultsView({ results, exam, preview, onReset, onGetExplanation }) {
   const { topic, subject, chapter, pyqs = [] } = results
   const colors = EXAM_COLORS[exam] || EXAM_COLORS.JEE
 
@@ -148,9 +148,15 @@ export default function ResultsView({ results, exam, preview, onReset }) {
         )}
       </div>
 
-      {/* Scan again */}
-      <div className="px-4 pb-10 pt-2 bg-white border-t border-gray-100">
-        <button onClick={onReset} className={`w-full py-4 text-white rounded-2xl font-bold text-sm active:scale-[0.98] transition-all ${colors.bar}`}>
+      {/* Bottom actions */}
+      <div className="px-4 pb-10 pt-3 bg-white border-t border-gray-100 flex flex-col gap-3">
+        <button
+          onClick={() => onGetExplanation(topic, subject, exam)}
+          className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm active:scale-[0.98] transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+        >
+          <span>🤔</span> Understand this Topic
+        </button>
+        <button onClick={onReset} className={`w-full py-3.5 text-white rounded-2xl font-bold text-sm active:scale-[0.98] transition-all ${colors.bar}`}>
           Scan Another Page
         </button>
       </div>
