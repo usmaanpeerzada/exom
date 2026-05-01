@@ -98,6 +98,23 @@ export default function DoubtView({ result, exam, preview, onReset, onGetPYQs })
           </div>
         )}
 
+        {/* YouTube */}
+        <button
+          onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(topic + ' ' + exam + ' explanation')}`, '_blank')}
+          className="w-full flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3.5 active:bg-red-100 transition-colors"
+        >
+          <svg className="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="#FF0000">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+          <div className="text-left">
+            <p className="text-red-700 font-bold text-sm">Watch on YouTube</p>
+            <p className="text-red-400 text-xs mt-0.5 truncate">{topic} {exam} explanation</p>
+          </div>
+          <svg className="w-4 h-4 text-red-300 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </button>
+
         {/* Cross-navigation prompt */}
         <div className="bg-blue-50 rounded-2xl border border-blue-100 px-4 py-3.5 flex items-center gap-3">
           <span className="text-xl">📝</span>
