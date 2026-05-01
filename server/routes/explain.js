@@ -27,7 +27,7 @@ router.post('/explain', async (req, res) => {
   try {
     const response = await groq.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 4096,
+      max_tokens: 2000,
       messages: [{
         role: 'user',
         content: `You are an expert tutor for Indian competitive exams${exam ? ` (${EXAM_CONTEXT[exam]})` : ''}.

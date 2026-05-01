@@ -40,7 +40,7 @@ router.post('/analyze', async (req, res) => {
   try {
     const response = await groq.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 8192,
+      max_tokens: 4000,
       messages: [
         {
           role: 'user',

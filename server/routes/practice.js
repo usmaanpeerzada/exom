@@ -31,7 +31,7 @@ router.post('/practice', async (req, res) => {
   try {
     const response = await groq.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 6000,
+      max_tokens: 3500,
       messages: [{
         role: 'user',
         content: `You are an expert on Indian competitive exams. Generate focused practice questions.
